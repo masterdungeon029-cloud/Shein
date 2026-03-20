@@ -6,11 +6,12 @@ import requests
 import re
 import random
 
-# Railway Environment Variables
+# --- CONFIGURATION ---
+# Note: Agar aapne Railway Variables mein ID daal rakhi hai, toh wahan badalna padega.
+# Warna yahan niche seedha apni nayi Group ID likh dein:
 TELEGRAM_BOT_TOKEN = os.environ.get("TELEGRAM_BOT_TOKEN")
-TELEGRAM_CHAT_ID = os.environ.get("TELEGRAM_CHAT_ID")
+TELEGRAM_CHAT_ID = "-1003585249344"  # <--- Aapki Nayi Group ID add ho gayi hai!
 
-# --- APKI SAARI LINKS (PURANI + NAYI) ---
 RAW_LINKS = """
 https://www.sheinindia.in/shein-shein-relaxed-fit-short-sleeve-cuban-collar-overlay-panel-pocket-shirt/p/443327677_coffee?user=old,
 https://www.sheinindia.in/shein-shein-medium-length-spread-collar-full-sleeve-checked-shirt/p/443391936_red?user=old,
@@ -50,75 +51,47 @@ https://www.sheinindia.in/shein-shein-medium-length-full-sleeve-sweatshirt/p/443
 https://www.sheinindia.in/shein-shein-panelled-light-wash-carpenter-style-cargo-jeans/p/443383999_midblue?user=old
 """
 
-# Extracting unique links and cleaning commas
 LINKS = list(set(re.findall(r'(https://www\.sheinindia\.in/[^\s,]+)', RAW_LINKS)))
-
 item_states = {}
 
 def send_telegram_message(message):
     url = f"https://api.telegram.org/bot{TELEGRAM_BOT_TOKEN}/sendMessage"
     payload = {"chat_id": TELEGRAM_CHAT_ID, "text": message, "parse_mode": "Markdown", "disable_web_page_preview": True}
-    try:
-        requests.post(url, json=payload)
-    except:
-        pass
+    try: requests.post(url, json=payload)
+    except: pass
 
 def check_shein_item(url):
-    # Mimicking real browsers to avoid bot detection
     scraper = cloudscraper.create_scraper(browser={'browser': 'chrome', 'platform': 'windows', 'desktop': True})
     try:
         response = scraper.get(url, timeout=15)
-        if response.status_code != 200:
-            return "ERROR", None
-        
+        if response.status_code != 200: return "ERROR", None
         soup = BeautifulSoup(response.text, 'html.parser')
         page_content = str(soup).lower()
-        
-        # --- STRICT CHECKING LOGIC ---
-        # Label check
         is_oos = any(x in page_content for x in ["out of stock", "sold out", "coming soon", "is currently out of stock"])
-        
-        # Real button check
         add_to_bag_btn = soup.find(string=re.compile('Add to Bag', re.I)) or soup.find('button', {'class': re.compile('add-to-cart|add-bag-btn', re.I)})
-        
-        # If no OOS text AND button is found, it's likely real stock
         if not is_oos and add_to_bag_btn:
             price = "Price on Site"
-            price_element = soup.find(class_=re.compile(r'price', re.I))
-            if price_element:
-                price = price_element.text.strip()
+            price_elem = soup.find(class_=re.compile(r'price', re.I))
+            if price_elem: price = price_elem.text.strip()
             return "REAL_STOCK", price
-        
         return "OUT", None
-            
-    except Exception:
-        return "ERROR", None
+    except: return "ERROR", None
 
 def main():
-    print(f"Total Unique Items: {len(LINKS)}")
-    send_telegram_message(f"🚨 **ULTRA NITRO + ANTI-GHOST ON**\nTotal unique links: {len(LINKS)}\n\nAb real stock aate hi shor machega! 🔥")
-    
-    # Initialize state
-    for link in LINKS:
-        item_states[link] = "OUT"
-        
+    send_telegram_message(f"🚨 **GROUP NOTIFICATIONS ACTIVE** 🚨\nMonitoring {len(LINKS)} items in Nitro + Anti-Ghost Mode.")
     while True:
         for link in LINKS:
             status, price = check_shein_item(link)
-            
             if status == "REAL_STOCK":
                 if item_states.get(link) != "IN_STOCK":
-                    msg = f"✅ **PRODUCT IN STOCK!**\n💰 **Price:** {price}\n🛒 **Loot Lo:** {link}"
+                    msg = f"⚡ **REAL LOOT ALERT!** ⚡\n💰 **Price:** {price}\n🛒 **Buy Now:** {link}"
                     send_telegram_message(msg)
                     item_states[link] = "IN_STOCK"
-            elif status == "OUT":
+            else:
                 item_states[link] = "OUT"
-            
-            # 2 seconds gap between items (Nitro speed)
             time.sleep(2)
-            
         print("Round complete. Restarting in 20 seconds...")
-        time.sleep(20) # Fast cycle restart
+        time.sleep(20)
 
 if __name__ == "__main__":
     main()
