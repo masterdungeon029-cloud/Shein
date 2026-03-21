@@ -7,10 +7,8 @@ import re
 import random
 
 # --- CONFIGURATION ---
-# Note: Agar aapne Railway Variables mein ID daal rakhi hai, toh wahan badalna padega.
-# Warna yahan niche seedha apni nayi Group ID likh dein:
 TELEGRAM_BOT_TOKEN = os.environ.get("TELEGRAM_BOT_TOKEN")
-TELEGRAM_CHAT_ID = "-1003585249344"  # <--- Aapki Nayi Group ID add ho gayi hai!
+TELEGRAM_CHAT_ID = "-1003585249344"  
 
 RAW_LINKS = """
 https://www.sheinindia.in/shein-shein-relaxed-fit-short-sleeve-cuban-collar-overlay-panel-pocket-shirt/p/443327677_coffee?user=old,
@@ -48,51 +46,108 @@ https://www.sheinindia.in/shein-shein-short-sleeves-graphic-back-print-crew-tshi
 https://www.sheinindia.in/shein-shein-relaxed-fit-drop-shoulder-typographic-back-print-crew-tshirt/p/443330475_white?user=old,
 https://www.sheinindia.in/shein-shein-short-sleeves-graphic-back-print-crew-tshirt/p/443389791_black?user=old,
 https://www.sheinindia.in/shein-shein-medium-length-full-sleeve-sweatshirt/p/443318638_beige?user=old,
-https://www.sheinindia.in/shein-shein-panelled-light-wash-carpenter-style-cargo-jeans/p/443383999_midblue?user=old
+https://www.sheinindia.in/shein-shein-panelled-light-wash-carpenter-style-cargo-jeans/p/443383999_midblue?user=old,
+https://www.sheinindia.in/shein-shein-drop-shoulder-numeric-chest-print-crew-tshirt/p/443383652_royalblue?user=old,
+https://www.sheinindia.in/shein-shein-drop-shoulder-numeric-chest-print-crew-tshirt/p/443383652_bottlegreen?user=old,
+https://www.sheinindia.in/shein-shein-drop-shoulder-graphic-chest-print-crew-tshirt/p/443388774_black?user=old,
+https://www.sheinindia.in/shein-shein-short-sleeves-contrast-striped-polo-tshirt/p/443330830_darkgreen?user=old,
+https://www.sheinindia.in/shein-shein-relaxed-fit-drop-shoulder-typographic-back-print-zipped-hoodie/p/443381800_darkgrey?user=old,
+https://www.sheinindia.in/shein-shein-drop-shoulder-graphic-front-print-crew-tshirt/p/443382829_stone?user=old,
+https://www.sheinindia.in/shein-shein-medium-length-short-sleeve-half-zipper-polo-tshirt/p/443329024_navy?user=old,
+https://www.sheinindia.in/shein-shein-drop-shoulder-graphic-back-print-crew-tshirt/p/443382837_navy?user=old,
+https://www.sheinindia.in/shein-shein-medium-length-short-sleeve-half-zipper-polo-tshirt/p/443329024_black?user=old,
+https://www.sheinindia.in/shein-shein-medium-length-short-sleeve-half-zipper-polo-tshirt/p/443329024_white?user=old,
+https://www.sheinindia.in/shein-shein-short-sleeves-contrast-striped-polo-tshirt/p/443330830_black?user=old,
+https://www.sheinindia.in/shein-shein-short-sleeves-contrast-striped-polo-tshirt/p/443330830_white?user=old,
+https://www.sheinindia.in/shein-shein-oversized-fit-drop-shoulder-typographic-back-floral-print-crew-tshirt/p/443331451_black?user=old,
+https://www.sheinindia.in/shein-shein-oversized-fit-drop-shoulder-typographic-back-floral-print-crew-tshirt/p/443331451_stone?user=old,
+https://www.sheinindia.in/shein-shein-activewear-short-sleeve-graphic-front-and-back-print-crew-tshirt/p/443383142_white?user=old,
+https://www.sheinindia.in/shein-shein-drop-shoulder-typographic-placement-print-tshirt/p/443383311_beige?user=old,
+https://www.sheinindia.in/shein-shein-party-medium-length-short-sleeve-sequins-style-shirt/p/443319394_maroon?user=old,
+https://www.sheinindia.in/shein-shein-drop-shoulder-typographic-chest-print-crew-tshirt/p/443331639_greymelange?user=old,
+https://www.sheinindia.in/shein-shein-short-sleeve-self-design-contrast-trim-polo-tshirt/p/443386549_navy?user=old,
+https://www.sheinindia.in/shein-shein-short-sleeve-self-design-contrast-trim-polo-tshirt/p/443386549_seagreen?user=old,
+https://www.sheinindia.in/shein-shein-relaxed-fit-medium-length-drop-shoulder-sweatshirt/p/443381777_blackmix?user=old,
+https://www.sheinindia.in/shein-shein-relaxed-fit-medium-length-drop-shoulder-sweatshirt/p/443381777_darkgrey?user=old,
+https://www.sheinindia.in/shein-shein-relaxed-fit-drop-shoulder-typographic-chest-print-crew-sweatshirt/p/443381346_olivegreen?user=old,
+https://www.sheinindia.in/shein-shein-relaxed-fit-drop-shoulder-typographic-chest-print-sweatshirt/p/443381773_darkgrey?user=old,
+https://www.sheinindia.in/shein-shein-medium-length-short-sleeve-zipped-ribbed-tshirt/p/443390484_brown?user=old,
+https://www.sheinindia.in/shein-shein-drop-shoulder-short-sleeve-ribbed-crew-tshirt/p/443391727_white?user=old,
+https://www.sheinindia.in/shein-shein-drop-shoulder-short-sleeve-ribbed-crew-tshirt/p/443391727_lightblue?user=old,
+https://www.sheinindia.in/shein-shein-drop-shoulder-short-sleeve-ribbed-crew-tshirt/p/443391727_brown?user=old,
+https://www.sheinindia.in/shein-shein-baggy-fit-full-length-fly-with-button-closure-clean-jeans/p/443393702_charcoal?user=old,
+https://www.sheinindia.in/shein-shein-medium-length-short-sleeve-ribbed-polo-tshirt/p/443390483_brown?user=old,
+https://www.sheinindia.in/shein-shein-drop-shoulder-numeric-back-print-crew-tshirt/p/443388880_olive?user=old
 """
 
-LINKS = list(set(re.findall(r'(https://www\.sheinindia\.in/[^\s,]+)', RAW_LINKS)))
+# Extracting unique links safely
+LINKS = list(set(re.findall(r'(https?://www\.sheinindia\.in/[^\s,]+)', RAW_LINKS, re.IGNORECASE)))
 item_states = {}
 
 def send_telegram_message(message):
     url = f"https://api.telegram.org/bot{TELEGRAM_BOT_TOKEN}/sendMessage"
     payload = {"chat_id": TELEGRAM_CHAT_ID, "text": message, "parse_mode": "Markdown", "disable_web_page_preview": True}
-    try: requests.post(url, json=payload)
-    except: pass
+    try: 
+        requests.post(url, json=payload)
+    except: 
+        pass
 
 def check_shein_item(url):
     scraper = cloudscraper.create_scraper(browser={'browser': 'chrome', 'platform': 'windows', 'desktop': True})
     try:
         response = scraper.get(url, timeout=15)
-        if response.status_code != 200: return "ERROR", None
+        if response.status_code != 200: 
+            return "ERROR", None
+            
         soup = BeautifulSoup(response.text, 'html.parser')
         page_content = str(soup).lower()
+        
+        # Out of stock check
         is_oos = any(x in page_content for x in ["out of stock", "sold out", "coming soon", "is currently out of stock"])
         add_to_bag_btn = soup.find(string=re.compile('Add to Bag', re.I)) or soup.find('button', {'class': re.compile('add-to-cart|add-bag-btn', re.I)})
+        
         if not is_oos and add_to_bag_btn:
             price = "Price on Site"
             price_elem = soup.find(class_=re.compile(r'price', re.I))
-            if price_elem: price = price_elem.text.strip()
+            if price_elem: 
+                price = price_elem.text.strip()
             return "REAL_STOCK", price
+            
         return "OUT", None
-    except: return "ERROR", None
+    except: 
+        return "ERROR", None
 
 def main():
-    send_telegram_message(f"🚨 **GROUP NOTIFICATIONS ACTIVE** 🚨\nMonitoring {len(LINKS)} items in Nitro + Anti-Ghost Mode.")
+    send_telegram_message(f"🚨 **BOT STARTED** 🚨\nMonitoring {len(LINKS)} items. Gap between links: 3 Seconds.")
+    
+    # Har ek ghante (3600 seconds) ke baad message bhejane ke liye start time record kiya
+    last_heartbeat_time = time.time()
+    
     while True:
+        # Check karna ki pichle message ko bheje hue 1 ghanta (3600 seconds) ho gaya ya nahi
+        current_time = time.time()
+        if current_time - last_heartbeat_time >= 3600:
+            send_telegram_message("sahab aache se kaam ho rha h fikar not")
+            last_heartbeat_time = current_time # Reset time for the next hour
+
         for link in LINKS:
             status, price = check_shein_item(link)
+            
             if status == "REAL_STOCK":
+                # Sirf tab message bhejo jab pehle out of stock tha
                 if item_states.get(link) != "IN_STOCK":
-                    msg = f"⚡ **REAL LOOT ALERT!** ⚡\n💰 **Price:** {price}\n🛒 **Buy Now:** {link}"
+                    msg = f"⚡ **ITEM IN STOCK!** ⚡\n💰 **Price:** {price}\n🛒 **Link:** {link}"
                     send_telegram_message(msg)
                     item_states[link] = "IN_STOCK"
             else:
                 item_states[link] = "OUT"
-            time.sleep(2)
-        print("Round complete. Restarting in 20 seconds...")
+                
+            # Time delay badha kar 3 second kar diya gaya hai
+            time.sleep(3)
+            
+        print("Ek round pura ho gaya. 20 seconds mein naya round shuru hoga...")
         time.sleep(20)
 
 if __name__ == "__main__":
     main()
-    
+                                                                                       
